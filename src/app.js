@@ -1,45 +1,58 @@
-//server create garam
 const express = require("express")
-const app = express()
+const noteModel = require("./models/note.model")
 
-app.use(express.json())
-// note ={
-//     title: "first note"
-//     desc: "dfrist desc"
-// }
+const app  = express()
+app.use(express.json());
 
-const notes = []
-   
-app.post('/notes',(req,res)=>{
-// console.log(req.body)
-notes.push(req.body)
-res.status(201).json({
-    message:"note created successfully"
-})
-})
-
-app.get('/notes',(req,res)=>{
-    res.status(200).json({
-        message:"notes fetced successfully",
-        notes: notes
+app.post("/notes",async (req,res)=>{
+    const data = req.body
+   await noteModel.create({
+        title:data.title,
+        description:data.description
+    })
+    res.status(201).json({
+        message: "note created"
     })
 })
 
+app.get("/notes", async(req,res)=>{
 
-app.delete('/notes/:index',(req,res)=>{
-    const index = req.params.index
-    delete notes[index]
+    // noteModel.fnd() // return a array of object
+//    const notes =  await noteModel.findOne({
+//     title: "test_title"
+//    }) //return an object
+
+const notes =  await noteModel.find({
+    // title: "test_title"
+   }) 
+
+
+   res.status(200).json({
+    message: "notes fetched successfully",
+    notes: notes
+   })
+})
+
+app.delete("/notes/:id", async(req,res)=>{
+    const id = req.params.id
+
+    await noteModel.findOneAndDelete({
+        _id:id
+    })
     res.status(200).json({
-        message:"note deleted"
+        message:"deleted successfully"
     })
 })
-app.patch("/notes/:index",(req,res)=>{
-    const index = req.params.index
-    const description  = req.body.description
-    notes[index].description = description
-
+app.patch("/notes/:id", async(req,res)=>{
+    const id = req.params.id
+    const description = req.body.description
+    await noteModel.findOneAndUpdate({
+        _id : id
+    }, {
+        description : description
+    })
     res.status(200).json({
-        message:"note updated"
+        message:"updated successfully"
     })
 })
 
